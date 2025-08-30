@@ -1,0 +1,19 @@
+{
+  "title": "Currency Service Overview",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Cache Hit Ratio",
+      "targets": [
+        { "query": "from(bucket: \"${INFLUX_BUCKET}\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"conversion\" and r.cache_hit == true)" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Provider Failures",
+      "targets": [
+        { "query": "from(bucket: \"${INFLUX_BUCKET}\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"provider_calls\" and r.status == \"failed\")" }
+      ]
+    }
+  ]
+}
