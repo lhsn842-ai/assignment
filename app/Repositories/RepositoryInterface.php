@@ -8,5 +8,5 @@ use MongoDB\Laravel\Eloquent\Model;
 interface RepositoryInterface
 {
     public function create(DTOInterface $dto): Model;
-    public function getById(string $id): ?Model;
+    function getById(string $id): ?Model;
 }

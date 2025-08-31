@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\DataObjects\DTOInterface;
 use App\Models\ExchangeRate;
+use Carbon\Carbon;
 use MongoDB\Laravel\Eloquent\Model;
 
 class ExchangeRateRepository implements RepositoryInterface
@@ -16,18 +17,20 @@ class ExchangeRateRepository implements RepositoryInterface
             'from_currency' => $dto->getFromCurrency(),
             'to_currency' => $dto->getToCurrency(),
             'amount' => $dto->getAmount(),
+            'created_at' => Carbon::now(),
         ]);
 
-        return ExchangeRate::query()->firstWhere('id', $id);
+        return $this->getById($id);
     }
 
-    public function getById(string $id): ?Model
+    public function getById(string $id): Model
     {
         return ExchangeRate::query()->find($id);
     }
 
-    public function updateResult(string $id, string $result): void
+    public function updateResult(string $id, string $result): Model
     {
         ExchangeRate::query()->where('id', $id)->update(['result' => $result]);
+        return $this->getById($id);
     }
 }
