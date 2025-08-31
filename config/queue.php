@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'database'),
+    'default' => env('QUEUE_CONNECTION', 'mongodb'),
 
     /*
     |--------------------------------------------------------------------------
@@ -71,7 +71,12 @@ return [
             'block_for' => null,
             'after_commit' => false,
         ],
-
+        'mongodb' => [
+            'driver' => 'mongodb',
+            'table' => 'jobs',
+            'queue' => 'default',
+            'retry_after' => 90,
+        ],
     ],
 
     /*
