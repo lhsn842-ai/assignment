@@ -20,15 +20,22 @@ class ExchangeRateCreatedEvent
     {
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, Channel>
-     */
-    public function broadcastOn(): array
+    public function broadcastOn(): PrivateChannel
+    {
+        return new PrivateChannel('user.' . $this->exchangeRate->user_id);
+    }
+
+    public function broadcastWith(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            'id'            => $this->exchangeRate->id,
+            'from_currency' => $this->exchangeRate->from_currency,
+            'to_currency'   => $this->exchangeRate->to_currency,
+            'amount'        => $this->exchangeRate->amount,
+            'result'        => $this->exchangeRate->result,
+            'status'        => $this->exchangeRate->status,
+            'created_at'    => $this->exchangeRate->created_at,
+            'updated_at'    => $this->exchangeRate->updated_at,
         ];
     }
 }

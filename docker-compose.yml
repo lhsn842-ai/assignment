@@ -94,6 +94,17 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - app
+  soketi:
+    image: quay.io/soketi/soketi:0.17-16-alpine
+    container_name: nosto_socketi
+    environment:
+      DEBUG: "1"
+      DEFAULT_APP_ID: ${APP_ID}
+      DEFAULT_APP_KEY: ${APP_KEY}
+      DEFAULT_APP_SECRET: ${APP_SECRET}
+    ports:
+      - "6001:6001"
+      - "9601:9601"
 volumes:
   redis-data:
   mongo-data:

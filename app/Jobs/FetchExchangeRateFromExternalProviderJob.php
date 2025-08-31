@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\ExchangeRateResultReadyEvent;
 use App\Models\ExchangeRate;
 use App\Repositories\ExchangeRateRepository;
 use App\Services\ExchangeRateService\ExchangeRateServiceInterface;
@@ -15,6 +16,8 @@ use Illuminate\Queue\SerializesModels;
 class FetchExchangeRateFromExternalProviderJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    private CONST TRIES = 3;
 
     /**
      * Create a new job instance.
@@ -34,17 +37,15 @@ class FetchExchangeRateFromExternalProviderJob implements ShouldQueue
             $result = $exchangeRateService->exchangeSingleCurrency($this->exchangeRate);
             $repository->updateResult($this->exchangeRate->id, $result->getQuote() * $this->exchangeRate->amount);
 
+            event(new ExchangeRateResultReadyEvent($this->exchangeRate));
         } catch (Exception $e) {
             $this->exchangeRate->increment('attempts');
 
-            if ($this->attempts() >= $this->tries) {
+            if ($this->attempts() >= self::TRIES) {
                 $this->exchangeRate->update(['status' => 'failed']);
             }
-
-            throw $e;
-        } finally {
             $duration = microtime(true) - $start;
-//            $metrics->observeJobExecution('CurrencyExchangeJob', $duration);
+            throw $e;
         }
     }
 }
