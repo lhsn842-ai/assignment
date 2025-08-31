@@ -17,11 +17,13 @@ RUN apt-get update && apt-get install -y npm
 RUN npm install npm@latest -g && \
     npm install n -g && \
     n latest
+RUN apt-get update && apt-get install -y supervisor
+
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 9000
 
-CMD ["php-fpm"]
-
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 #FROM build AS prod
 #
 #COPY ./dist ./dist
