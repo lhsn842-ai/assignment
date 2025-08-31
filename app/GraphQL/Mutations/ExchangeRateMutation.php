@@ -1,0 +1,47 @@
+<?php
+
+namespace App\GraphQL\Mutations;
+
+use App\DataObjects\CreateExchangeRateDto;
+use App\Events\ExchangeRateCreatedEvent;
+use App\Repositories\ExchangeRateRepository;
+use GraphQL\Type\Definition\ResolveInfo;
+use Illuminate\Http\Response;
+use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
+
+class ExchangeRateMutation
+{
+    public function __construct(private readonly ExchangeRateRepository $repository)
+    {
+
+    }
+
+    public function create($rootValue, array $args, GraphQLContext $context = null, ResolveInfo $resolveInfo)
+    {
+        try {
+            $dto = new CreateExchangeRateDto(
+                amount: $args['input']['amount'],
+                fromCurrency: $args['input']['fromCurrency'],
+                toCurrency: $args['input']['toCurrency'],
+                userId: '68b404a04e81c8beed0a3032',
+            );
+
+            $exchangeRate = $this->repository->create($dto);
+            if ($exchangeRate->id) {
+                event(new ExchangeRateCreatedEvent($exchangeRate));
+            }
+
+            return [
+                'statusCode' => Response::HTTP_CREATED,
+                'message' => 'Exchange rate created successfully.',
+                'data' => $exchangeRate,
+            ];
+        } catch (\Throwable $exception) {
+            return [
+                'statusCode' => Response::HTTP_EXPECTATION_FAILED,
+                'message' => 'Exchange rate failed to create.',
+                'data' => $exception->getMessage(),
+            ];
+        }
+    }
+}
