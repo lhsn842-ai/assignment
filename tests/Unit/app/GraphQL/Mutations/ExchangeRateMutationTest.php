@@ -20,15 +20,16 @@ class ExchangeRateMutationTest extends TestCase
         Event::fake();
 
         $repository = Mockery::mock(ExchangeRateRepository::class);
+        $exchangeRate = new ExchangeRate([
+            'from_currency' => 'USD',
+            'to_currency' => 'EUR',
+            'amount' => 100,
+            'status' => 'pending',
+        ]);
+        $exchangeRate->id = '507f1f77bcf86cd799439011';
         $repository->shouldReceive('create')
             ->once()
-            ->andReturn(new ExchangeRate([
-                'id' => 1,
-                'from_currency' => 'USD',
-                'to_currency' => 'EUR',
-                'amount' => 100,
-                'status' => 'pending',
-            ]));
+            ->andReturn($exchangeRate);
 
         $resolver = new ExchangeRateMutation($repository);
 
