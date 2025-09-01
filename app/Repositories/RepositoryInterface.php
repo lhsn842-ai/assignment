@@ -3,10 +3,10 @@
 namespace App\Repositories;
 
 use App\DataObjects\DTOInterface;
-use MongoDB\Laravel\Eloquent\Model;
+use App\Models\ExchangeRate;
 
 interface RepositoryInterface
 {
-    public function create(DTOInterface $dto): Model;
-    function getById(string $id): ?Model;
+    public function create(DTOInterface $dto): ExchangeRate;
+    function getById(string $id): ?ExchangeRate;
 }

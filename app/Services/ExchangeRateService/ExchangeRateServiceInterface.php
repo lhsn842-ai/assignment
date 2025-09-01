@@ -8,4 +8,8 @@ use App\ValueObjects\SingleCurrencyExchangeRateVOInterface;
 interface ExchangeRateServiceInterface
 {
     public function exchangeSingleCurrency(ExchangeRate $exchangeRate): SingleCurrencyExchangeRateVOInterface;
+
+    public function getCacheKey(ExchangeRate $exchangeRate): string;
+
+    public function getCachedValue(ExchangeRate $exchangeRate): ?ExchangeRate;
 }

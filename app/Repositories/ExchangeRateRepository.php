@@ -5,12 +5,11 @@ namespace App\Repositories;
 use App\DataObjects\DTOInterface;
 use App\Models\ExchangeRate;
 use Carbon\Carbon;
-use MongoDB\Laravel\Eloquent\Model;
 
 class ExchangeRateRepository implements RepositoryInterface
 {
 
-    public function create(DTOInterface $dto): Model
+    public function create(DTOInterface $dto): ExchangeRate
     {
         $id = ExchangeRate::query()->insertGetId([
             'user_id' => $dto->getUserId(),
@@ -23,12 +22,12 @@ class ExchangeRateRepository implements RepositoryInterface
         return $this->getById($id);
     }
 
-    public function getById(string $id): Model
+    public function getById(string $id): ExchangeRate
     {
         return ExchangeRate::query()->find($id);
     }
 
-    public function updateResult(string $id, string $result): Model
+    public function updateResult(string $id, string $result): ExchangeRate
     {
         ExchangeRate::query()->where('id', $id)->update(['result' => $result]);
         return $this->getById($id);

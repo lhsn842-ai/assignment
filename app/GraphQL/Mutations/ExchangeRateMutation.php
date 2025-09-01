@@ -5,13 +5,14 @@ namespace App\GraphQL\Mutations;
 use App\DataObjects\CreateExchangeRateDto;
 use App\Events\ExchangeRateCreatedEvent;
 use App\Repositories\ExchangeRateRepository;
+use App\Services\ExchangeRateService\ExchangeRateServiceInterface;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Http\Response;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
 class ExchangeRateMutation
 {
-    public function __construct(private readonly ExchangeRateRepository $repository)
+    public function __construct(private readonly ExchangeRateRepository $repository, private readonly ExchangeRateServiceInterface $service)
     {
 
     }
@@ -27,14 +28,16 @@ class ExchangeRateMutation
             );
 
             $exchangeRate = $this->repository->create($dto);
-            if ($exchangeRate->id) {
+
+            $cachedValue = $this->service->getCachedValue($exchangeRate);
+            if (!$cachedValue) {
                 event(new ExchangeRateCreatedEvent($exchangeRate));
             }
 
             return [
                 'statusCode' => Response::HTTP_CREATED,
                 'message' => 'Exchange rate created successfully.',
-                'data' => $exchangeRate,
+                'data' => $cachedValue ?? $exchangeRate,
             ];
         } catch (\Throwable $exception) {
             return [
