@@ -1,0 +1,201 @@
+{
+  "id": null,
+  "title": "Nosto overal monitoring",
+  "tags": ["laravel", "php", "monitoring"],
+  "style": "dark",
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request Rate by Route",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(app_requests_total[5m])",
+          "legendFormat": "{{route}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "barAlignment": 0,
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "insertNulls": false,
+            "showPoints": "never",
+            "pointSize": 5
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Total Requests by Route",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "app_requests_total",
+          "legendFormat": "{{route}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "displayMode": "list",
+            "orientation": "horizontal"
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Event Duration Heatmap",
+      "type": "heatmap",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(app_event_duration_seconds_bucket[5m])",
+          "legendFormat": "{{event}}",
+          "refId": "A"
+        }
+      ],
+      "heatmap": {
+        "xBucketSize": "1m",
+        "yBucketSize": "auto"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Cache Hit Rate",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 18 },
+      "targets": [
+        {
+          "expr": "rate(app_events_dispatched_total{event=\"Illuminate\\\\Cache\\\\Events\\\\CacheHit\"}[5m]) / (rate(app_events_dispatched_total{event=\"Illuminate\\\\Cache\\\\Events\\\\CacheHit\"}[5m]) + rate(app_events_dispatched_total{event=\"Illuminate\\\\Cache\\\\Events\\\\CacheMissed\"}[5m])) * 100",
+          "legendFormat": "Hit Rate %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": 0 },
+              { "color": "yellow", "value": 70 },
+              { "color": "green", "value": 90 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Job Failures Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 18 },
+      "targets": [
+        {
+          "expr": "rate(app_jobs_failed_total[5m])",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "GraphQL Operations",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 18 },
+      "targets": [
+        {
+          "expr": "rate(app_graphql_requests_total[5m])",
+          "legendFormat": "{{operation}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Queue Activity",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "expr": "rate(app_events_dispatched_total{event=~\".*JobQueued\"}[5m])",
+          "legendFormat": "Jobs Queued",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(app_events_dispatched_total{event=~\".*JobPopped\"}[5m])",
+          "legendFormat": "Jobs Processed",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(app_events_dispatched_total{event=~\".*JobFailed\"}[5m])",
+          "legendFormat": "Jobs Failed",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Top Laravel Events",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "targets": [
+        {
+          "expr": "topk(10, rate(app_events_dispatched_total[5m]))",
+          "legendFormat": "{{event}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Average Event Duration by Type",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+      "targets": [
+        {
+          "expr": "rate(app_event_duration_seconds_sum[5m]) / rate(app_event_duration_seconds_count[5m])",
+          "legendFormat": "{{event}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      }
+    }
+  ]
+}

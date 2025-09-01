@@ -1,14 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
-use Prometheus\Storage\InMemory;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/metrics', function (\Prometheus\CollectorRegistry $registry) {
+Route::get('/metrics', function (CollectorRegistry $registry) {
     $counter = $registry->getOrRegisterCounter(
         'app',
         'requests_total',
