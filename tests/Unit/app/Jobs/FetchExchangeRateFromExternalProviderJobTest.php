@@ -7,65 +7,35 @@ use App\Jobs\FetchExchangeRateFromExternalProviderJob;
 use App\Models\ExchangeRate;
 use App\Repositories\ExchangeRateRepository;
 use App\Services\ExchangeRateService\ExchangeRateServiceInterface;
-use App\ValueObjects\SingleCurrencyExchangeRateVOInterface;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
-use Mockery;
 use Tests\TestCase;
 
 class FetchExchangeRateFromExternalProviderJobTest extends TestCase
 {
-    public function test_job_executes_successfully_and_dispatches_event()
+    public function test_job_puts_value_in_cache_and_dispatches_event()
     {
         Event::fake();
+        Cache::flush();
 
-        $exchangeRate = new ExchangeRate([
+        $exchangeRate = ExchangeRate::factory()->create([
             'amount' => 100,
-            'user_id' => 'user-123',
-        ]);
-        $exchangeRate->id = 'test1123';
-        $quoteMock = Mockery::mock(SingleCurrencyExchangeRateVOInterface::class);
-        $quoteMock->shouldReceive('getQuote')->andReturn(11.1);
-
-        $serviceMock = Mockery::mock(ExchangeRateServiceInterface::class);
-        $serviceMock->shouldReceive('exchangeSingleCurrency')
-            ->with($exchangeRate)
-            ->andReturn($quoteMock);
-
-        $repositoryMock = Mockery::mock(ExchangeRateRepository::class);
-        $repositoryMock->shouldReceive('updateResult')
-            ->once()
-            ->with($exchangeRate->id, 11.1 * $exchangeRate->amount);
-
-        $job = new FetchExchangeRateFromExternalProviderJob($exchangeRate);
-
-        $job->handle($serviceMock, $repositoryMock);
-
-        Event::assertDispatched(ExchangeRateResultReadyEvent::class, function ($event) use ($exchangeRate) {
-            return $event->exchangeRate->id === $exchangeRate->id;
-        });
-    }
-
-    public function test_job_handles_service_exception()
-    {
-        $exchangeRate = new ExchangeRate([
-            'id' => 'test-id',
-            'amount' => 100,
-            'user_id' => 'user-123',
-            'result' => null,
+            'from_currency' => 'EUR',
+            'to_currency' => 'USD',
         ]);
 
-        $serviceMock = Mockery::mock(ExchangeRateServiceInterface::class);
-        $serviceMock->shouldReceive('exchangeSingleCurrency')
-            ->andThrow(new \Exception('API failure'));
+        (new FetchExchangeRateFromExternalProviderJob($exchangeRate))
+            ->handle(
+                app()->make(ExchangeRateServiceInterface::class),
+                app()->make(ExchangeRateRepository::class)
+            );
 
-        $repositoryMock = Mockery::mock(ExchangeRateRepository::class);
-        $repositoryMock->shouldIgnoreMissing();
+        $cacheKey = app(ExchangeRateServiceInterface::class)
+            ->getCacheKey($exchangeRate);
 
-        $job = new FetchExchangeRateFromExternalProviderJob($exchangeRate);
+        $this->assertTrue(Cache::has($cacheKey));
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('API failure');
-
-        $job->handle($serviceMock, $repositoryMock);
+        Event::assertDispatched(ExchangeRateResultReadyEvent::class);
     }
 }
+

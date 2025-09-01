@@ -10,8 +10,6 @@ A simple Laravel 12 application with PHP 8.2 that supports GraphQL mutations, as
 - **Real-time:** Soketi / Pusher
 - **GraphQL:** Lighthouse
 
----
-
 ## Running Locally
 
 ### 1. Start Docker Containers
@@ -63,3 +61,17 @@ mutation {
 4. Once the rate is fetched, another event is dispatched.
 
 5. The final event publishes the result to a WebSocket channel, allowing clients to update the UI in real-time.
+
+### Caching mechanism
+We store our webservice call results in redis cache and we keep it for 5 minutes for each currency pair
+Every graphql mutation to create a new exchange rate first checks if the value already exists in cache it wont dispatch the job at all
+If the value did not exist in the cache then we trigger and event that dispatches a job and the job asynchronously calls the webservice and updates the result AND caches the result for next calls.
+(I could implement a simple CQRS mechanism for this also)
+
+###Graphana dashboard
+All of the services are up and running right after docker compose up -d using supervisor so you can open this URL to see a sample dashboard.
+
+http://localhost:3000/d/e6d34a83-5272-4c37-a034-be09cce591bc/nosto-overal-monitoring?orgId=1&refresh=30s
+
+Metrics are exposed from /metrics endpoint using prometheus.
+

@@ -6,6 +6,7 @@ use App\Events\ExchangeRateCreatedEvent;
 use App\GraphQL\Mutations\ExchangeRateMutation;
 use App\Models\ExchangeRate;
 use App\Repositories\ExchangeRateRepository;
+use App\Services\ExchangeRateService\ExchangeRateServiceInterface;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Event;
@@ -31,7 +32,9 @@ class ExchangeRateMutationTest extends TestCase
             ->once()
             ->andReturn($exchangeRate);
 
-        $resolver = new ExchangeRateMutation($repository);
+        $exchangeRateService = Mockery::mock(ExchangeRateServiceInterface::class);
+        $exchangeRateService->shouldReceive('getCachedValue')->andReturn(null);
+        $resolver = new ExchangeRateMutation($repository, $exchangeRateService);
 
         $args = [
             'input' => [
@@ -61,8 +64,9 @@ class ExchangeRateMutationTest extends TestCase
         $repository->shouldReceive('create')
             ->once()
             ->andThrow(new \Exception('Database error'));
+        $exchangeRateService = Mockery::mock(ExchangeRateServiceInterface::class);
 
-        $resolver = new ExchangeRateMutation($repository);
+        $resolver = new ExchangeRateMutation($repository, $exchangeRateService);
 
         $args = [
             'input' => [
