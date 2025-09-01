@@ -11,6 +11,7 @@
         "laravel/tinker": "^2.10.1",
         "mongodb/laravel-mongodb": "^5.5",
         "nuwave/lighthouse": "^6.62",
+        "promphp/prometheus_client_php": "^2.14",
         "pusher/pusher-php-server": "^7.2"
     },
     "require-dev": {
