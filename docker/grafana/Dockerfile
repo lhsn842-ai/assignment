@@ -1,3 +1,3 @@
 FROM grafana/grafana:9.5.0
-COPY grafana/provisioning /etc/grafana/provisioning
-COPY grafana/dashboards /var/lib/grafana/dashboards
+COPY provisioning/dashboards.yaml /etc/grafana/provisioning/dashboards/dashboards.yaml
+COPY provisioning/dashboards/overal.json /etc/grafana/provisioning/dashboards/overal.json
