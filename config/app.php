@@ -122,5 +122,8 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-
+    'redis' => [
+        'redist_host' => env('REDIS_HOST', 'redis'),
+        'redis_password' => env('REDIS_PASSWORD'),
+    ]
 ];

@@ -2,6 +2,7 @@
 
 namespace App\DataObjects;
 
+
 class CreateExchangeRateDto implements DTOInterface
 {
     public function __construct(

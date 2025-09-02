@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate .env file
+        run: |
+          echo "APP_NAME=${{ vars.APP_NAME }}" >> .env
+          echo "APP_ENV=${{ vars.APP_ENV }}" >> .env
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+          echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> .env
+          echo "APP_ID=${{ vars.APP_ID }}" >> .env
+          echo "APP_DEBUG=${{ vars.APP_DEBUG }}" >> .env
+          echo "APP_URL=${{ vars.APP_URL }}" >> .env
+          echo "PHP_CLI_SERVER_WORKERS=${{ vars.PHP_CLI_SERVER_WORKERS }}" >> .env
+          echo "SWOP_API_KEY=${{ secrets.SWOP_API_KEY }}" >> .env
+          echo "SWOP_BASE_URL=${{ vars.SWOP_BASE_URL }}" >> .env
+          echo "INFLUX_URL=${{ vars.INFLUX_URL }}" >> .env
+          echo "INFLUX_TOKEN=${{ secrets.INFLUX_TOKEN }}" >> .env
+          echo "INFLUX_ORG=${{ vars.INFLUX_ORG }}" >> .env
+          echo "INFLUX_BUCKET=${{ vars.INFLUX_BUCKET }}" >> .env
+          echo "INFLUX_USER=${{ secrets.INFLUX_USER }}" >> .env
+          echo "INFLUX_PASSWORD=${{ secrets.INFLUX_PASSWORD }}" >> .env
+          echo "GRAFANA_USER=${{ secrets.GRAFANA_USER }}" >> .env
+          echo "GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}" >> .env
+          echo "DB_CONNECTION=${{ vars.DB_CONNECTION }}" >> .env
+          echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
+          echo "DB_DATABASE=${{ vars.DB_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "MONGO_URI=mongodb://${{ secrets.DB_USERNAME }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST }}:${{ vars.DB_PORT }}/${{ vars.DB_DATABASE }}?authSource=admin" >> .env
+          echo "CACHE_DRIVER=${{ vars.CACHE_DRIVER }}" >> .env
+          echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
+          echo "REDIS_CLIENT=${{ vars.REDIS_CLIENT }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "SESSION_DRIVER=${{ vars.SESSION_DRIVER || secrets.SESSION_DRIVER }}" >> .env
+          echo "SESSION_LIFETIME=${{ vars.SESSION_LIFETIME || secrets.SESSION_LIFETIME }}" >> .env
+          echo "SESSION_ENCRYPT=${{ vars.SESSION_ENCRYPT || secrets.SESSION_ENCRYPT }}" >> .env
+          echo "SESSION_PATH=${{ vars.SESSION_PATH || secrets.SESSION_PATH }}" >> .env
+          echo "SESSION_DOMAIN=${{ vars.SESSION_DOMAIN || secrets.SESSION_DOMAIN }}" >> .env
+          echo "SESSION_CONNECTION=${{ vars.SESSION_CONNECTION || secrets.SESSION_CONNECTION }}" >> .env
+          echo "QUEUE_CONNECTION=${{ vars.QUEUE_CONNECTION || secrets.QUEUE_CONNECTION }}" >> .env
+          echo "BROADCAST_DRIVER=${{ vars.BROADCAST_DRIVER || secrets.BROADCAST_DRIVER }}" >> .env
+          echo "BROADCAST_CONNECTION=${{ vars.BROADCAST_CONNECTION || secrets.BROADCAST_CONNECTION }}" >> .env
+          echo "PUSHER_APP_ID=${{ secrets.PUSHER_APP_ID }}" >> .env
+          echo "PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}" >> .env
+          echo "PUSHER_APP_SECRET=${{ secrets.PUSHER_APP_SECRET }}" >> .env
+          echo "PUSHER_HOST=${{ vars.PUSHER_HOST || secrets.PUSHER_HOST }}" >> .env
+          echo "PUSHER_PORT=${{ vars.PUSHER_PORT || secrets.PUSHER_PORT }}" >> .env
+          echo "PUSHER_SCHEME=${{ vars.PUSHER_SCHEME || secrets.PUSHER_SCHEME }}" >> .env
+          echo "PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER || secrets.PUSHER_APP_CLUSTER }}" >> .env
+
+      - name: Build containers
+        run: docker compose --env-file .env build
+
+      - name: Start services
+        run: docker compose --env-file .env up -d
+
+      - name: Wait for MongoDB
+        run: |
+          docker compose exec -T mongo bash -c '
+            until mongosh --eval "db.runCommand({ ping: 1 })" --quiet; do 
+              echo "Waiting for MongoDB..."
+              sleep 2
+            done
+          '
+
+      - name: Wait for Redis
+        run: |
+          docker compose exec -T redis sh -c '
+            until redis-cli ping; do
+              echo "Waiting for Redis..."
+              sleep 2
+            done
+          '
+
+      - name: Install dependencies
+        run: docker compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Run database migrations
+        run: docker compose run --rm app php artisan migrate:fresh --seed
+
+      - name: Clear config cache
+        run: docker compose run --rm app php artisan config:clear
+
+      - name: Run unit tests
+        run: docker compose run --rm app php artisan test --testsuite=Unit
+
+      - name: Run static analysis
+        run: docker compose run --rm app ./vendor/bin/phpstan analyse --memory-limit=1G
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v

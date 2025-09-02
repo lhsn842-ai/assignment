@@ -12,9 +12,9 @@ class MetricsServiceProvider extends ServiceProvider
     {
         $this->app->singleton(CollectorRegistry::class, function () {
             $adapter = new Redis([
-                'host' => env('REDIS_HOST', 'redis'),
+                'host' => config('redis_host', 'redis'),
                 'port' => 6379,
-                'password' => env('REDIS_PASSWORD', null),
+                'password' => config('redis_password', null),
                 'timeout' => 0.1, // seconds
                 'read_timeout' => 10, // seconds
                 'persistent_connections' => false,

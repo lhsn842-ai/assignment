@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\ExchangeRate;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -16,7 +17,7 @@ class ExchangeRateCreatedEvent
     /**
      * Create a new event instance.
      */
-    public function __construct(public readonly Model $exchangeRate)
+    public function __construct(public readonly ExchangeRate $exchangeRate)
     {
     }
 

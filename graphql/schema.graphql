@@ -73,7 +73,7 @@ type AuthPayload {
 }
 
 type Mutation {
-    exchange(input: InputCurrencyExchange!): CurrencyExchangeResponse @field(resolver: "App\\GraphQL\\Mutations\\ExchangeRateMutation@create")
+    exchange(input: InputCurrencyExchange!): CurrencyExchangeResponse @field(resolver: "App\\GraphQL\\Mutations\\ExchangeRateMutation@create") @guard(with: ["sanctum"])
 
     login(email: String!, password: String!): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutation@login")
 }
