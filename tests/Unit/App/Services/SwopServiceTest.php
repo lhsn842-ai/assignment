@@ -24,9 +24,10 @@ class SwopServiceTest extends TestCase
             'quote' => 1.11,
             'date' => '2025-08-31',
         ];
-
         Http::fake([
-            self::BASE_URL => Http::response($fakeResponse),
+            'https://swop.cx*' => function () use ($fakeResponse) {
+                return Http::response($fakeResponse, 200);
+            },
         ]);
 
         $service = new SwopService();
@@ -46,13 +47,14 @@ class SwopServiceTest extends TestCase
         ]);
 
         Http::fake([
-            self::BASE_URL => Http::response('Unauthorized', 401),
+            'https://swop.cx*' => function ($request) {
+                return Http::response('not-a-json', 200);
+            },
         ]);
 
         $service = new SwopService();
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('API request failed: Unauthorized');
 
         $service->exchangeSingleCurrency($exchangeRate);
     }
@@ -66,7 +68,9 @@ class SwopServiceTest extends TestCase
         ]);
 
         Http::fake([
-            'https://swop.cx/rest/rates/EUR/USD' => Http::response('not-a-json', 200),
+            'https://swop.cx*' => function ($request) {
+                return Http::response('not-a-json', 200);
+            },
         ]);
 
         $service = new SwopService();

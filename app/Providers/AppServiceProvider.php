@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\GraphQLMetricsListener;
 use App\Listeners\JobMetricsListener;
+use App\Models\PersonalAccessToken;
 use App\Services\ExchangeRateService\ExchangeRateServiceInterface;
 use App\Services\ExchangeRateService\SwopService;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -12,6 +13,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 use Nuwave\Lighthouse\Events\EndRequest;
 use Nuwave\Lighthouse\Events\StartRequest;
 use Prometheus\CollectorRegistry;
@@ -37,6 +39,8 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(JobProcessing::class, [JobMetricsListener::class, 'handleProcessing']);
         Event::listen(JobProcessed::class, [JobMetricsListener::class, 'handleProcessed']);
         Event::listen(JobFailed::class, [JobMetricsListener::class, 'handleFailed']);
+
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
         $events->listen('*', function ($eventName, array $data) use ($registry) {
             $counter = $registry->getOrRegisterCounter(

@@ -9,22 +9,21 @@ use Prometheus\CollectorRegistry;
 
 class JobMetricsListener
 {
-    private CollectorRegistry $registry;
     private array $startTimes = [];
 
-    public function __construct(CollectorRegistry $registry)
+    public function __construct(private readonly CollectorRegistry $registry)
     {
-        $this->registry = $registry;
     }
 
     public function handleProcessing(JobProcessing $event)
     {
-        $this->startTimes[$event->job->getJobId()] = microtime(true);
+        $jobId = spl_object_hash($event->job);
+        $this->startTimes[$jobId] = microtime(true);
     }
 
     public function handleProcessed(JobProcessed $event)
     {
-        $id = $event->job->getJobId();
+        $id = spl_object_hash($event->job);
         $duration = microtime(true) - ($this->startTimes[$id] ?? microtime(true));
         $name = $event->job->resolveName();
 

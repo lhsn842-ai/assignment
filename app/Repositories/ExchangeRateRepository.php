@@ -11,7 +11,7 @@ class ExchangeRateRepository implements RepositoryInterface
 
     public function create(DTOInterface $dto): ExchangeRate
     {
-        $id = ExchangeRate::query()->insertGetId([
+        $id = (string) ExchangeRate::query()->insertGetId([
             'user_id' => $dto->getUserId(),
             'from_currency' => $dto->getFromCurrency(),
             'to_currency' => $dto->getToCurrency(),
@@ -27,7 +27,7 @@ class ExchangeRateRepository implements RepositoryInterface
         return ExchangeRate::query()->find($id);
     }
 
-    public function updateResult(string $id, string $result): ExchangeRate
+    public function updateResult(string $id, float $result): ExchangeRate
     {
         ExchangeRate::query()->where('id', $id)->update(['result' => $result]);
         return $this->getById($id);

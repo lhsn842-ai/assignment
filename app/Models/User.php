@@ -7,13 +7,14 @@ use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
-use MongoDB\Laravel\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 use MongoDB\Laravel\Relations\HasMany;
+use MongoDB\Laravel\Auth\User as MongoUser ;
 
-class User extends Model implements AuthenticatableContract
+class User extends MongoUser implements AuthenticatableContract
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, Authenticatable;
+    use HasFactory, Notifiable, Authenticatable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -49,7 +50,7 @@ class User extends Model implements AuthenticatableContract
         ];
     }
 
-    /** @return HasMany<ExchangeRate> */
+    /** @return HasMany<ExchangeRate, User> */
     public function exchangeRates(): HasMany
     {
         return $this->hasMany(ExchangeRate::class);

@@ -136,6 +136,10 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/webmozart/assert" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/webonyx/graphql-php" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/iamcal/sql-parser" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/nunomaduro/larastan" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/phpstan/phpstan" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel/sanctum" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

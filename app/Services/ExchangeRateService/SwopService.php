@@ -17,8 +17,8 @@ class SwopService implements ExchangeRateServiceInterface
 
     public function __construct()
     {
-        $this->apiKey = env('SWOP_API_KEY');
-        $this->apiUrl = 'https://swop.cx/rest';
+        $this->apiKey = config('services.swop.api_key');
+        $this->apiUrl = config('services.swop.base_url');
     }
 
     public function exchangeSingleCurrency(ExchangeRate $exchangeRate): SingleCurrencyExchangeRateVOInterface
@@ -44,8 +44,8 @@ class SwopService implements ExchangeRateServiceInterface
     {
         return sprintf(
             'exchange_rate:%s:%s:%s',
-            $exchangeRate->fromCurrency,
-            $exchangeRate->toCurrency,
+            $exchangeRate->from_currency,
+            $exchangeRate->to_currency,
             $exchangeRate->amount
         );
     }

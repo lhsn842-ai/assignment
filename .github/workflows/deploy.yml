@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker registry
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+
+      - name: Build and tag image
+        run: |
+          docker build -t myapp:latest .
+          docker tag myapp:latest my-registry/myapp:latest
+
+      - name: Push image
+        run: docker push my-registry/myapp:latest
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to production
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: just-for-assignment
+          username: just-for-assignment
+          key: just-for-assignment
+          script: |
+            cd /var/www/
+            docker compose pull
+            docker compose up -d
