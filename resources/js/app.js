@@ -110,7 +110,6 @@ if (exchangeForm) {
                     amount
                     fromCurrency
                     toCurrency
-                    result
                     userId
                     created_at
                 }
@@ -133,23 +132,13 @@ if (exchangeForm) {
             const exchangeData = response.data.data.exchange;
 
             if (exchangeData.statusCode === 201) {
-                if (exchangeData.data.result) {
-                    document.getElementById('resultP').innerHTML = 'Fetched from cache';
-                    resultDiv.innerHTML += `
-                    <p class="text-green-600 font-semibold">${exchangeData.message}</p>
-                    <p>From: ${exchangeData.data.fromCurrency}</p>
-                    <p>To: ${exchangeData.data.toCurrency}</p>
-                    <p>Amount: ${exchangeData.data.amount}</p>
-                    <p>Result: ${exchangeData.data.result}</p>
-                    <p>Created at: ${exchangeData.data.created_at}</p>`;
-                } else {
-                    resultDiv.innerHTML += `
-                    <p class="text-green-600 font-semibold">${exchangeData.message}</p>
-                    <p>From: ${exchangeData.data.fromCurrency}</p>
-                    <p>To: ${exchangeData.data.toCurrency}</p>
-                    <p>Amount: ${exchangeData.data.amount}</p>
-                    <p>Created at: ${exchangeData.data.created_at}</p>`;
-                }
+                resultDiv.innerHTML += `
+                <p class="text-green-600 font-semibold">${exchangeData.message}</p>
+                <p>From: ${exchangeData.data.fromCurrency}</p>
+                <p>To: ${exchangeData.data.toCurrency}</p>
+                <p>Amount: ${exchangeData.data.amount}</p>
+                <p>Created at: ${exchangeData.data.created_at}</p>
+            `;
             } else {
                 resultDiv.innerHTML = `<p class="text-red-500">Error: ${exchangeData.message}</p>`;
             }
