@@ -38,7 +38,7 @@ class ExchangeRateMutation
 
             return [
                 'statusCode' => Response::HTTP_CREATED,
-                'message' => 'Exchange rate created successfully.',
+                'message' => $cachedValue ? 'Exchange rate existed in cache.' : 'Exchange rate created successfully.',
                 'data' => $cachedValue ?? $exchangeRate,
             ];
         } catch (\Throwable $exception) {

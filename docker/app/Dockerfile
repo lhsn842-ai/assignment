@@ -36,12 +36,9 @@ COPY docker/app/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY docker/app/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN echo '#!/bin/bash\nnpm run build\nexec "$@"' > /usr/local/bin/docker-entrypoint.sh
+COPY docker/app/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-COPY docker/app/docker-entrypoint.sh /docker/app/docker-entrypoint.sh
-RUN chmod +x /docker/app/docker-entrypoint.sh
-ENTRYPOINT ["/docker/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 EXPOSE 9000
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
