@@ -43,10 +43,9 @@ class SwopService implements ExchangeRateServiceInterface
     public function getCacheKey(ExchangeRate $exchangeRate): string
     {
         return sprintf(
-            'exchange_rate:%s:%s:%s',
-            $exchangeRate->from_currency,
-            $exchangeRate->to_currency,
-            $exchangeRate->amount
+            'exchange_rate:%s:%s',
+            strtoupper($exchangeRate->from_currency),
+            strtoupper($exchangeRate->to_currency)
         );
     }
 
@@ -55,7 +54,7 @@ class SwopService implements ExchangeRateServiceInterface
         $cacheKey = $this->getCacheKey($exchangeRate);
         if (Cache::has($cacheKey)) {
             $cachedValue = Cache::get($cacheKey);
-            $exchangeRate->result = (int) $cachedValue * $exchangeRate->amount;
+            $exchangeRate->result = (float) $cachedValue * $exchangeRate->amount;
             return $exchangeRate;
         } else {
             return null;
