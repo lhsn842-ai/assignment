@@ -9,34 +9,30 @@ use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
 class AuthMutation
 {
-    public function login($rootValue, array $args, GraphQLContext $context = null)
+    public function login($_, array $args)
     {
         $user = User::where('email', $args['email'])->first();
 
-        if (!$user || !Hash::check($args['password'], $user->password)) {
+        if (! $user || ! Hash::check($args['password'], $user->password)) {
             return [
-                'status' => 0,
+                'status' => 401,
                 'message' => 'Invalid credentials',
                 'token' => null,
                 'user' => null,
             ];
         }
 
-        //$token = $user->createToken('graphql-token')->plainTextToken;
-        if (Auth::attempt(['email' => $args['email'], 'password' => $args['password']])) {
-            return [
-                'status' => 1,
-                'message' => 'Logged in successfully',
-                'token' => Auth::user()->createToken('Personal Access Token')->plainTextToken,
-                'user' => Auth::user(),
-            ];
-        } else {
-            return [
-                'status' => 0,
-                'message' => 'Invalid credentials',
-                'token' => null,
-                'user' => null,
-            ];
-        }
+        // 🔑 Log the user into the session (for Sanctum cookie + broadcasting)
+        Auth::login($user, true);
+
+        // 🔑 Also issue an API token (optional but useful for XHR calls)
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return [
+            'status' => 200,
+            'message' => 'Login successful',
+            'token' => $token,
+            'user' => $user,
+        ];
     }
 }

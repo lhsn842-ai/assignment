@@ -2,22 +2,23 @@
 
 namespace App\Events;
 
-use App\Models\ExchangeRate;
-use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Queue\SerializesModels;
 
 class ExchangeRateResultReadyEvent implements ShouldBroadcast
 {
-    use SerializesModels;
+    public function __construct(
+        public string $exchangeRateId,
+        public string $userId,
+        public ?float $result = null
+    ) {}
 
-    public function __construct(public ExchangeRate $exchangeRate) {}
-
-    public function broadcastOn(): PrivateChannel
+    public function broadcastOn(): Channel
     {
-        return new PrivateChannel('user.' . $this->exchangeRate->user_id);
+        $channel = 'user.' . $this->userId;
+        return new Channel($channel);
     }
-
+    
     public function broadcastAs(): string
     {
         return 'ExchangeRateResultReadyEvent';
@@ -26,8 +27,8 @@ class ExchangeRateResultReadyEvent implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'exchangeRateId' => $this->exchangeRate->id,
-            'result' => $this->exchangeRate->result,
+            'exchangeRateId' => $this->exchangeRateId,
+            'result' => $this->result,
         ];
     }
 }

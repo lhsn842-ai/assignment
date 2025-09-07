@@ -20,11 +20,13 @@ class ExchangeRateMutation
     public function create($rootValue, array $args, GraphQLContext $context = null, ResolveInfo $resolveInfo)
     {
         try {
+            $userId = auth()->id();
+
             $dto = new CreateExchangeRateDto(
                 amount: $args['input']['amount'],
                 fromCurrency: $args['input']['fromCurrency'],
                 toCurrency: $args['input']['toCurrency'],
-                userId: '68b404a04e81c8beed0a3032',
+                userId: $userId,
             );
 
             $exchangeRate = $this->repository->create($dto);

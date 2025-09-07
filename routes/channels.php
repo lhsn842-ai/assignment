@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\Broadcast;
 | used to check if an authenticated user can listen to the channel.
 |
 */
+// Disable auth for testing
+Broadcast::routes();
 
+// Allow all connections to user channels for testing
 Broadcast::channel('user.{id}', function ($user, $id) {
-    return (string) $user->id === (string) $id;
+    return true; // Allow all connections
 });

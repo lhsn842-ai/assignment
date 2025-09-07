@@ -40,10 +40,14 @@ class FetchExchangeRateFromExternalProviderJob implements ShouldQueue
             $cacheKey = $exchangeRateService->getCacheKey($this->exchangeRate);
 
             $result = $exchangeRateService->exchangeSingleCurrency($this->exchangeRate);
-            $repository->updateResult($this->exchangeRate->id, (float) $result->getQuote() * $this->exchangeRate->amount);
+            $exchangeRate = $repository->updateResult($this->exchangeRate->id, (float) $result->getQuote() * $this->exchangeRate->amount);
             Cache::put($cacheKey, $result->getQuote(), self::CACHE_TTL);
 
-            event(new ExchangeRateResultReadyEvent($this->exchangeRate));
+            event(new ExchangeRateResultReadyEvent(
+                $exchangeRate->id,
+                $exchangeRate->user_id,
+                $exchangeRate->result
+            ));
         } catch (Exception $e) {
             $this->exchangeRate->increment('attempts');
 
