@@ -5,6 +5,7 @@ namespace Tests\Unit\App\GraphQl\Mutations;
 use App\Events\ExchangeRateCreatedEvent;
 use App\GraphQL\Mutations\ExchangeRateMutation;
 use App\Models\ExchangeRate;
+use App\Models\User;
 use App\Repositories\ExchangeRateRepository;
 use App\Services\ExchangeRateService\ExchangeRateServiceInterface;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -19,6 +20,8 @@ class ExchangeRateMutationTest extends TestCase
     public function test_creates_exchange_rate_and_dispatches_event(): void
     {
         Event::fake();
+        $user = User::factory()->make(['id' => 1]);
+        $this->be($user);
 
         $repository = Mockery::mock(ExchangeRateRepository::class);
         $exchangeRate = new ExchangeRate([
@@ -60,6 +63,9 @@ class ExchangeRateMutationTest extends TestCase
 
     public function test_returns_error_when_creation_fails(): void
     {
+        $user = User::factory()->make(['id' => 1]);
+        $this->be($user);
+
         $repository = Mockery::mock(ExchangeRateRepository::class);
         $repository->shouldReceive('create')
             ->once()

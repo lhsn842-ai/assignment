@@ -17,15 +17,11 @@ A simple Laravel 12 application with PHP 8.2 that supports GraphQL mutations, as
 ```bash
 docker compose up -d
 ```
-### 2. Enter the App Container
-```bash
-docker compose exec -it app bash
-```
-### 3. Run Migrations & Seed Database
-```bash
-php artisan migrate --seed
-```
-### 4. Open GraphQL Playground
+### 2. Open this url in your browser
+http://localhost:8000/login
+email: user@nosto.local.com
+password: password123
+### You can Open GraphQL Playground
 http://localhost:8000/graphql-playground
 
 ### Sample Mutation
@@ -76,16 +72,6 @@ mutation {
 ```
 ![img_1.png](img_1.png)
 
-Now if you run this command you will see everytime you create a new exchange rate a new message like following publishes in the socket connection:
-
-```json
-⚡ HTTP Payload received:
-{
-  name: 'ExchangeRateResultReadyEvent',
-  data: '{"exchangeRateId":"68b774cd10fbffe3cf080db2","result":1101.9839}',
-  channel: 'private-user.68b404a04e81c8beed0a3032'
-}
-```
 ### How It Works
 1. When the mutation is run, the request is inserted into the database.
 

@@ -11,6 +11,7 @@ services:
     depends_on:
       - redis
       - mongo
+      - soketi
     environment:
       - APP_ENV=${APP_ENV}
       - APP_DEBUG=${APP_DEBUG}
@@ -19,20 +20,31 @@ services:
       - MONGO_URI=${MONGO_URI}
       - REDIS_HOST=redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - XDEBUG_MODE=debug
-      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 idekey=PHPSTORM
+      - BROADCAST_CONNECTION=pusher
+      - PUSHER_APP_ID=2046131
+      - PUSHER_APP_KEY=af94301e1b5908bbaaa3
+      - PUSHER_APP_SECRET=7a7865754d707b24bba2
+      - PUSHER_HOST=soketi
+      - PUSHER_PORT=6001
+      - PUSHER_SCHEME=http
+      - PUSHER_APP_CLUSTER=eu
     ports:
       - 9000:9000
+      - 9003:9003
       - 8000:8000
-      - 5174:5174
-
+      - 5173:5173
+    networks:
+      - nosto-network
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
   redis:
     image: redis:7-alpine
     container_name: nosto_redis
     restart: unless-stopped
     volumes:
       - redis-data:/data
-
+    networks:
+      - nosto-network
   mongo:
     image: mongo:6.0
     container_name: nosto_mongo
@@ -45,6 +57,8 @@ services:
       - 27017:27017
     volumes:
       - mongo-data:/data/db
+    networks:
+      - nosto-network
   influxdb:
     image: influxdb:2.7
     container_name: nosto_influxdb
@@ -60,7 +74,8 @@ services:
       - 8086:8086
     volumes:
       - influxdb-data:/var/lib/influxdb2
-
+    networks:
+      - nosto-network
   grafana:
     image: grafana/grafana:9.5.0
     container_name: nosto_grafana
@@ -75,6 +90,8 @@ services:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - nosto-network
   prometheus:
     image: prom/prometheus:latest
     container_name: nosto_prometheus
@@ -85,17 +102,22 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - app
+    networks:
+      - nosto-network
   soketi:
-    image: quay.io/soketi/soketi:0.17-16-alpine
+    image: quay.io/soketi/soketi:latest-16-alpine
     container_name: nosto_socketi
     environment:
-      DEBUG: "1"
-      DEFAULT_APP_ID: ${APP_ID}
-      DEFAULT_APP_KEY: ${APP_KEY}
-      DEFAULT_APP_SECRET: ${APP_SECRET}
+      SOKETI_DEBUG: '${SOKETI_DEBUG:-1}'
+      SOKETI_METRICS_SERVER_PORT: '9601'
+      SOKETI_DEFAULT_APP_ID: '${PUSHER_APP_ID}'
+      SOKETI_DEFAULT_APP_KEY: '${PUSHER_APP_KEY}'
+      SOKETI_DEFAULT_APP_SECRET: '${PUSHER_APP_SECRET}'
     ports:
-      - "6001:6001"
-      - "9601:9601"
+      - 6001:6001
+      - 9601:9601
+    networks:
+      - nosto-network
 volumes:
   redis-data:
   mongo-data:
@@ -103,5 +125,5 @@ volumes:
   grafana-data:
 
 networks:
-  default:
+  nosto-network:
     driver: bridge

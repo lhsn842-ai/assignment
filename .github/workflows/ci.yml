@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-test:
@@ -88,13 +88,13 @@ jobs:
           '
 
       - name: Install dependencies
-        run: docker compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader
-
-      - name: Run database migrations
-        run: docker compose run --rm app php artisan migrate:fresh --seed
+        run: docker compose run --rm app sh -c "composer install --no-interaction --prefer-dist --optimize-autoloader"
 
       - name: Clear config cache
         run: docker compose run --rm app php artisan config:clear
+
+      - name: Run migrations
+        run: docker compose run --rm app php artisan migrate --seed
 
       - name: Run unit tests
         run: docker compose run --rm app php artisan test --testsuite=Unit

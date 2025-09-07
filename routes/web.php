@@ -4,9 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/login', 'login')->name('login');
+Route::view('/dashboard', 'dashboard');
 
 Route::get('/metrics', function (CollectorRegistry $registry) {
     $counter = $registry->getOrRegisterCounter(
