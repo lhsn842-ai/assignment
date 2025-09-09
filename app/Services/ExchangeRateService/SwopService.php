@@ -43,10 +43,9 @@ class SwopService implements ExchangeRateServiceInterface
     public function getCacheKey(ExchangeRate $exchangeRate): string
     {
         return sprintf(
-            'exchange_rate:%s:%s:%s',
+            'exchange_rate:%s:%s',
             $exchangeRate->from_currency,
             $exchangeRate->to_currency,
-            $exchangeRate->amount
         );
     }
 
