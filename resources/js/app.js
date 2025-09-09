@@ -79,7 +79,7 @@ if (exchangeForm) {
         });
 
         channel.listen('.ExchangeRateResultReadyEvent', (payload) => {
-            document.getElementById('resultP').innerHTML = `<p style="color: mediumseagreen">Exchange result: ${payload.result}</p>`;
+            document.getElementById('resultP').innerHTML = `<p style="color: darkblue">Exchange result: ${payload.result}</p>`;
         });
 
     }).catch(error => {
@@ -110,6 +110,7 @@ if (exchangeForm) {
                     amount
                     fromCurrency
                     toCurrency
+                    result
                     userId
                     created_at
                 }
@@ -132,13 +133,19 @@ if (exchangeForm) {
             const exchangeData = response.data.data.exchange;
 
             if (exchangeData.statusCode === 201) {
+                if (exchangeData.data.result) {
+                    resultDiv.innerHTML = `<p id="resultP" style="color: #172a3a">Fetched from cache</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p id="resultP" style="color: #172a3a">Fetched by api call</p>`;
+                }
                 resultDiv.innerHTML += `
-                <p class="text-green-600 font-semibold">${exchangeData.message}</p>
-                <p>From: ${exchangeData.data.fromCurrency}</p>
-                <p>To: ${exchangeData.data.toCurrency}</p>
-                <p>Amount: ${exchangeData.data.amount}</p>
-                <p>Created at: ${exchangeData.data.created_at}</p>
-            `;
+                    <p class="text-green-950 font-semibold">${exchangeData.message}</p>
+                    <p>From: ${exchangeData.data.fromCurrency}</p>
+                    <p>To: ${exchangeData.data.toCurrency}</p>
+                    <p>Amount: ${exchangeData.data.amount}</p>
+                    ${exchangeData.data.result ? `<p>Result: ${exchangeData.data.result}</p>` : ""}
+                    <p>Created at: ${exchangeData.data.created_at}</p>
+                `;
             } else {
                 resultDiv.innerHTML = `<p class="text-red-500">Error: ${exchangeData.message}</p>`;
             }
